@@ -1,0 +1,154 @@
+﻿@model MyModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";    
+}
+
+@section head {
+    <script src="~/Addons/file-upload/jquery.fileupload.js"></script>
+    <script src="~/Addons/file-upload/jquery.fileupload-ui.js"></script>
+    <script src="~/Addons/file-upload/jquery.iframe-transport.js"></script>
+
+    <script type="text/javascript">
+
+        var jqXHRData;
+
+        $(document).ready(function () {
+
+            initSimpleFileUpload();
+            initAutoFileUpload();
+            initFileUploadWithCheckingSize();
+
+            $("#hl-start-upload").on('click', function () {
+                if (jqXHRData) {
+                    jqXHRData.submit();
+                }
+                return false;
+            });
+
+            $("#hl-start-upload-with-size").on('click', function () {
+                if (jqXHRData) {
+                    var isStartUpload = true;
+                    var uploadFile = jqXHRData.files[0];
+
+                    if (!(/\.(gif|jpg|jpeg|tiff|png)$/i).test(uploadFile.name)) {
+                        alert('You must select an image file only');
+                        isStartUpload = false;
+                    } else if (uploadFile.size > 4000000) { // 4mb
+                        alert('Please upload a smaller image, max size is 4 MB');
+                        isStartUpload = false;
+                    }
+                    if (isStartUpload) {
+                        jqXHRData.submit();
+                    }
+                }
+                return false;
+            });
+        });
+
+        function initSimpleFileUpload() {
+            'use strict';
+
+            $('#fu-my-simple-upload').fileupload({
+                url: '/File/UploadFile',
+                dataType: 'json',
+                add: function (e, data) {
+                    jqXHRData = data
+                },
+                done: function (event, data) {
+                    if (data.result.isUploaded) {
+
+                    }
+                    else {
+
+                    }
+                    alert(data.result.message);
+                },
+                fail: function (event, data) {
+                    if (data.files[0].error) {
+                        alert(data.files[0].error);
+                    }
+                }
+            });
+        }
+
+        function initAutoFileUpload() {
+            'use strict';
+
+            $('#fu-my-auto-upload').fileupload({
+                autoUpload: true,
+                url: '/File/UploadFile',
+                dataType: 'json',
+                add: function (e, data) {
+                    var jqXHR = data.submit()
+                        .success(function (data, textStatus, jqXHR) {
+                            if (data.isUploaded) {
+
+                            }
+                            else {
+
+                            }
+                            alert(data.message);
+                        })
+                        .error(function (data, textStatus, errorThrown) {
+                            if (typeof (data) != 'undefined' || typeof (textStatus) != 'undefined' || typeof (errorThrown) != 'undefined') {
+                                alert(textStatus + errorThrown + data);
+                            }
+                        });
+                },
+                fail: function (event, data) {
+                    if (data.files[0].error) {
+                        alert(data.files[0].error);
+                    }
+                }
+            });
+        }
+
+        function initFileUploadWithCheckingSize() {
+            'use strict';
+
+            $('#fu-my-simple-upload-with-size').fileupload({
+                url: '/File/UploadFile',
+                dataType: 'json',
+                add: function (e, data) {
+                    jqXHRData = data;
+
+                },
+                done: function (event, data) {
+                    if (data.result.isUploaded) {
+
+                    }
+                    else {
+
+                    }
+                    alert(data.result.message);
+                },
+                fail: function (event, data) {
+                    if (data.files[0].error) {
+                        alert(data.files[0].error);
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+<div>
+    <h1>Upload by click</h1>
+</div>
+<div>@Html.TextBoxFor(m => m.MyFile, new { id = "fu-my-simple-upload", type = "file" }) &nbsp;<a href="#" id="hl-start-upload">Start upload</a> </div>
+<br />
+<br />
+<div>
+    <h1>Auto Upload</h1>
+</div>
+<div>@Html.TextBoxFor(m => m.MyFile, new { id = "fu-my-auto-upload", type = "file" })</div>
+<br />
+<br />
+<div>
+    <h1>Upload with checking size and file type</h1>
+</div>
+<div>
+    @*Of course here you can use Html.TextBoxFor if you wish*@
+    <input type="file" name="MyFile" id="fu-my-simple-upload-with-size" />
+    &nbsp;<a href="#" id="hl-start-upload-with-size">Start upload</a>
+</div>
